@@ -90,3 +90,9 @@ create table if not exists rhapsody_of_realities (
     created_on timestamptz not null default current_timestamp at time zone 'Africa/Douala', -- date partnership was created in db
     last_updated timestamptz not null default current_timestamp at time zone 'Africa/Douala' -- date partnership was updated (if updated)
 );
+
+-- TAP
+
+-- HS
+
+-- L&B
