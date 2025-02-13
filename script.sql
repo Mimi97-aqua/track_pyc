@@ -1,79 +1,92 @@
 -- MEMBERS
 
 -- members table
-create table members (
-    id uuid,
-    first_name varchar(255),
-    last_name varchar(255),
-    phone_number varchar(255), --includes country code
-    email varchar(255),
-    gender varchar(20), --male or female
-    date_of_birth date,
-    address varchar(255),
-    is_baptized boolean, --true or false
-    is_born_again boolean,
-    cell_id int, -- references ID in cells table
-    fellowship_center_id int,
-    foundation_school_status varchar(255), -- graduated, enrolled, un-enrolled
-    department_id int,
-    joined_on date, -- assume first day of first month of specified year if date is not known
-    professional_status varchar(255), -- employed, unemployed, student
-    occupation varchar(255),
-    emergency_contact_name varchar(255), -- could be parent, sibling etc
-    emergency_contact_relation varchar(255), -- mother, father, aunt, uncle, grandmother, grandfather, brother, sister,
+create extension if not exists "uuid-ossp";
+-- drop table if exists members;
+create table if not exists members (
+    id uuid default uuid_generate_v4() primary key,
+    first_names text not null check(char_length(trim(first_names)) > 0),
+    last_names text not null check(char_length(trim(first_names)) > 0),
+    phone_number text unique,
+    whatsapp_number text unique,
+    email varchar(100) unique not null,
+    gender varchar(1) not null, --male or female | M/F
+    date_of_birth date not null check(date_of_birth <= current_date - interval '13 years'), -- ensures member must be at
+    -- least 13 years old
+    address text not null,
+    is_baptized boolean not null, --true or false
+    is_born_again boolean not null,
+    cell_id serial references cells(id) on delete set null,
+    fellowship_center_id serial references fellowship_centers(id) on delete set null,
+    department_id serial references departments(id) on delete set null,
+    foundation_school_status text not null, -- graduated, enrolled, un-enrolled
+    joined_on date not null, -- assume first day of first month of specified year if date is not known
+    professional_status text, -- employed, unemployed, student
+    occupation text,
+    school_name text,
+    emergency_contact_name text not null, -- could be parent, sibling etc
+    emergency_contact_relation text not null, -- mother, father, aunt, uncle, grandmother, grandfather, brother, sister,
         -- friend, neighbour, spouse, other
-    emergency_contact_phone varchar(255),
-    emergency_contact_whatsapp varchar(255),
-    created_on timestamp, -- date member was created in db
-    updated_on timestamp,
-    profile_photo bytea,
+    emergency_contact_phone text not null,
+    emergency_contact_whatsapp text,
+    created_on timestamptz not null default current_timestamp at time zone 'Africa/Douala', -- date member was created in db
+    last_updated timestamptz not null default current_timestamp at time zone 'Africa/Douala', -- date any row was updated/modified
+    profile_photo bytea not null
 );
 
 -- cells table
-create table cells (
-  id int,
-  leader_id uuid(), -- references the member ID in members table
-  assistant_id uuid(), -- references the member ID in members table
-  cell_name varchar(255),
-  venue varchar(255), -- address of the cell
-  meeting_day varchar(255), -- selects between Monday to Sunday
-  meeting_time timestamp,
-  member_count int,
-  creation_date date, -- date cell was birthed
-  created_on timestamp, -- date cell was created in db
-  updated_on timestamp,
-  is_senior_cell boolean
+-- drop table if exists cells;
+create table if not exists cells (
+  id serial primary key,
+  leader_id uuid references members(id) on delete set null, -- references the member ID in members table
+  assistant_id uuid references members(id) on delete set null, -- references the member ID in members table
+  cell_name text unique not null,
+  venue text not null, -- address of the cell
+  meeting_day text not null, -- selects between Monday to Sunday
+  meeting_time time not null,
+  member_count int not null,
+  creation_date date not null, -- date cell was birthed
+  created_on timestamptz not null default current_timestamp at time zone 'Africa/Douala', -- date cell was created in db
+  last_updated timestamptz not null default current_timestamp at time zone 'Africa/Douala',
+  is_senior_cell boolean not null
 );
 
 -- departments table
-create table departments (
-    id int,
-    leader_id uuid(), -- references id in members table
-    assistant_id uuid(), -- references id in members table
-    name varchar(255),
-    member_count int,
-    description varchar(255),
-    created_on timestamp, -- date department was created in db
-    updated_on timestamp
+-- drop table if exists departments;
+create table if not exists departments (
+    id serial primary key,
+    leader_id uuid references members(id) on delete set null, -- references id in members table
+    assistant_id uuid references members(id) on delete set null, -- references id in members table
+    name text unique not null,
+    member_count int not null,
+    description text,
+    created_on timestamptz not null default current_timestamp at time zone 'Africa/Douala', -- date department was created in db
+    last_updated timestamptz not null default current_timestamp at time zone 'Africa/Douala'
 );
 
 -- fellowship centers table
-create table fellowship_center (
-    id int,
-    leader_id uuid(), --references member from members table
-    assistant_id uuid(),
-    venue varchar(255), -- address of the center eg Buea Town
-    member_count int
+-- drop table if exists fellowship_centers;
+create table if not exists fellowship_centers (
+    id serial primary key,
+    leader_id uuid references members(id) on delete set null, --references member from members table
+    assistant_id uuid references members(id) on delete set null,
+    venue text not null, -- address of the center eg Buea Town
+    member_count int not null,
+    created_on timestamptz not null default current_timestamp at time zone 'Africa/Douala', -- date department was created in db
+    last_updated timestamptz not null default current_timestamp at time zone 'Africa/Douala'
 );
 
 -- FINANCES
 
 -- ROR
-create table rhapsody_of_realities (
-    id int,
-    member_id uuid(), -- references member in members table
-    amount int,
-    status varchar(255), -- given | pledged
-    method varchar(255), -- cash | MTN Momo | Orange Money
-    date date
+-- drop table if exists rhapsody_of_realities
+create table if not exists rhapsody_of_realities (
+    id serial primary key,
+    member_id uuid references members(id) on delete restrict, -- references member in members table
+    amount int not null,
+    status text not null, -- given | pledged
+    method text not null, -- cash | MTN Momo | Orange Money
+    date date not null, -- date amount was given
+    created_on timestamptz not null default current_timestamp at time zone 'Africa/Douala', -- date partnership was created in db
+    last_updated timestamptz not null default current_timestamp at time zone 'Africa/Douala' -- date partnership was updated (if updated)
 );
