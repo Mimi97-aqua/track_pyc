@@ -29,8 +29,8 @@ create table if not exists members (
         -- friend, neighbour, spouse, other
     emergency_contact_phone text not null,
     emergency_contact_whatsapp text,
-    created_on timestamptz not null default current_timestamp at time zone 'Africa/Douala', -- date member was created in db
-    last_updated timestamptz not null default current_timestamp at time zone 'Africa/Douala', -- date any row was updated/modified
+    created_on timestamptz not null default (current_timestamp at time zone 'Africa/Douala'), -- date member was created in db
+    last_updated timestamptz not null default (current_timestamp at time zone 'Africa/Douala'), -- date any row was updated/modified
     profile_photo bytea not null
 );
 
@@ -46,8 +46,8 @@ create table if not exists cells (
   meeting_time time not null,
   member_count int not null,
   creation_date date not null, -- date cell was birthed
-  created_on timestamptz not null default current_timestamp at time zone 'Africa/Douala', -- date cell was created in db
-  last_updated timestamptz not null default current_timestamp at time zone 'Africa/Douala',
+  created_on timestamptz not null default (current_timestamp at time zone 'Africa/Douala'), -- date cell was created in db
+  last_updated timestamptz not null default (current_timestamp at time zone 'Africa/Douala'),
   is_senior_cell boolean not null
 );
 
@@ -60,8 +60,8 @@ create table if not exists departments (
     name text unique not null,
     member_count int not null,
     description text,
-    created_on timestamptz not null default current_timestamp at time zone 'Africa/Douala', -- date department was created in db
-    last_updated timestamptz not null default current_timestamp at time zone 'Africa/Douala'
+    created_on timestamptz not null default (current_timestamp at time zone 'Africa/Douala'), -- date department was created in db
+    last_updated timestamptz not null default (current_timestamp at time zone 'Africa/Douala')
 );
 
 -- fellowship centers table
@@ -72,8 +72,8 @@ create table if not exists fellowship_centers (
     assistant_id uuid references members(id) on delete set null,
     venue text not null, -- address of the center eg Buea Town
     member_count int not null,
-    created_on timestamptz not null default current_timestamp at time zone 'Africa/Douala', -- date department was created in db
-    last_updated timestamptz not null default current_timestamp at time zone 'Africa/Douala'
+    created_on timestamptz not null default (current_timestamp at time zone 'Africa/Douala'), -- date department was created in db
+    last_updated timestamptz not null default (current_timestamp at time zone 'Africa/Douala')
 );
 
 -- FINANCES
@@ -87,8 +87,8 @@ create table if not exists rhapsody_of_realities (
     status text not null, -- given | pledged
     method text not null, -- cash | MTN Momo | Orange Money
     date date not null, -- date amount was given
-    created_on timestamptz not null default current_timestamp at time zone 'Africa/Douala', -- date partnership was created in db
-    last_updated timestamptz not null default current_timestamp at time zone 'Africa/Douala' -- date partnership was updated (if updated)
+    created_on timestamptz not null default (current_timestamp at time zone 'Africa/Douala'), -- date partnership was created in db
+    last_updated timestamptz not null default (current_timestamp at time zone 'Africa/Douala') -- date partnership was updated (if updated)
 );
 
 -- TAP
