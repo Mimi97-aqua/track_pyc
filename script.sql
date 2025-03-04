@@ -204,3 +204,21 @@ alter table fellowship_centers add constraint fk_fellowship_center_assistant for
 -- modify ot null constraint for email in members table
 alter table members
 alter column email drop not null;
+
+-- create gender table
+create table gender (
+    id serial primary key,
+    type varchar(10) not null unique
+);
+
+insert into gender (type)
+values ('M'), ('F');
+
+alter table members
+drop column gender;
+
+alter table members
+add column gender_id int;
+
+alter table members
+add constraint fk_gender foreign key (gender_id) references gender(id) on delete set null;
