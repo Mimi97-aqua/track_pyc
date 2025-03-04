@@ -222,3 +222,18 @@ add column gender_id int;
 
 alter table members
 add constraint fk_gender foreign key (gender_id) references gender(id) on delete set null;
+
+-- create foundation_school_status table
+create table foundation_school_status (
+    id serial primary key,
+    status text not null unique
+);
+
+insert into foundation_school_status (status)
+values ('Graduated'), ('Enrolled'), ('Un-enrolled');
+
+alter table members drop column foundation_school_status;
+alter table members add column foundation_school_status_id int;
+
+alter table members
+add constraint fk_foundation_school_status foreign key (foundation_school_status_id) references foundation_school_status(id) on delete set null;
