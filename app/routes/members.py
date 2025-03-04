@@ -55,7 +55,7 @@ def create_members():
             is_born_again = request.form.get('is_born_again')
             foundation_school_status_id = request.form.get('foundation_school_status_id')
             joined_on = request.form.get('joined_on')
-            professional_status = request.form.get('professional_status')
+            professional_status_id = request.form.get('professional_status_id')
             occupation = request.form.get('occupation')
             school_name = request.form.get('school_name')
             emergency_contact_name = request.form.get('emergency_contact_name')
@@ -68,7 +68,7 @@ def create_members():
             profile_photo = request.files.get('profile_photo')
 
             if (not first_names or not last_names or not gender_id or not date_of_birth or not address or not is_baptized
-                    or not is_born_again or not foundation_school_status_id or not joined_on or professional_status or not
+                    or not is_born_again or not foundation_school_status_id or not joined_on or professional_status_id or not
                     emergency_contact_phone or not profile_photo):
                 return jsonify({
                     'status': 'Error',
@@ -99,7 +99,7 @@ def create_members():
                 """,
                 (first_names, last_names, phone_number, whatsapp_number, email, gender_id, date_of_birth, address,
                     is_baptized, is_born_again, cell_id, fellowship_center_id, department_id, foundation_school_status_id,
-                    joined_on, professional_status, occupation, school_name, emergency_contact_name, emergency_contact_relation,
+                    joined_on, professional_status_id, occupation, school_name, emergency_contact_name, emergency_contact_relation,
                     emergency_contact_phone,emergency_contact_whatsapp, profile_photo, created_on, last_updated)
             )
 

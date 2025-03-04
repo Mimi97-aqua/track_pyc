@@ -237,3 +237,18 @@ alter table members add column foundation_school_status_id int;
 
 alter table members
 add constraint fk_foundation_school_status foreign key (foundation_school_status_id) references foundation_school_status(id) on delete set null;
+
+-- create professional_status table
+create table professional_status (
+    id serial primary key,
+    status text not null unique
+);
+
+insert into professional_status (status)
+values ('Employed'), ('Unemployed');
+
+alter table members drop column professional_status;
+alter table members add column professional_status_id int;
+
+alter table members
+add constraint fk_professional_status foreign key (professional_status_id) references professional_status(id) on delete set null;
