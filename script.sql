@@ -9,7 +9,7 @@ create table if not exists members (
     last_names text not null check(char_length(trim(first_names)) > 0),
     phone_number text unique,
     whatsapp_number text unique,
-    email varchar(100) unique not null,
+    email varchar(100) unique,
     gender varchar(1) not null, --male or female | M/F
     date_of_birth date not null check(date_of_birth <= current_date - interval '13 years'), -- ensures member must be at
     -- least 13 years old
@@ -199,3 +199,8 @@ alter table fellowship_centers
 
 alter table fellowship_centers add constraint fk_fellowship_center_leader foreign key (leader_id) references members(id) on delete set null;
 alter table fellowship_centers add constraint fk_fellowship_center_assistant foreign key (assistant_id) references members(id) on delete set null;
+
+-- modifying colum constraint
+-- modify ot null constraint for email in members table
+alter table members
+alter column email drop not null;
