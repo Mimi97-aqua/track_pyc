@@ -25,11 +25,11 @@ def get_db_connection():
     Establishes a database connection to the PostgreSQL database using credentials from the environment variables.
     """
     db_params = {
-        'db_name': os.getenv('db_name'),
-        'db_user': os.getenv('db_user'),
-        'db_password': os.getenv('db_password'),
-        'db_host': os.getenv('db_host'),
-        'port': os.getenv('db_port'),
+        'dbname': os.getenv('dbname'),
+        'user': os.getenv('user'),
+        'password': os.getenv('password'),
+        'host': os.getenv('host'),
+        'port': os.getenv('port'),
     }
     return psycopg2.connect(**db_params)
 
