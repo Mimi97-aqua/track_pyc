@@ -252,3 +252,18 @@ alter table members add column professional_status_id int;
 
 alter table members
 add constraint fk_professional_status foreign key (professional_status_id) references professional_status(id) on delete set null;
+
+-- create emergency_contact_relation table
+create table emergency_contact_relation (
+    id serial primary key,
+    relation text not null unique
+);
+
+insert into emergency_contact_relation (relation)
+values ('Brother'), ('Sister'), ('Uncle'), ('Aunt'), ('Mother'), ('Father'), ('Grandmother'), ('Grandfather'), ('Guardian'), ('Friend'), ('Neighbour'), ('Other');
+
+alter table members drop column emergency_contact_relation;
+alter table members add column emergency_contact_relation_id int;
+
+alter table members
+add constraint fk_emergency_contact_relation foreign key (emergency_contact_relation_id) references emergency_contact_relation(id) on delete set null;

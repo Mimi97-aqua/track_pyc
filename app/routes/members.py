@@ -92,7 +92,7 @@ def create_members():
                 insert into members (
                     first_names, last_names, phone_number, whatsapp_number, email, gender_id, date_of_birth, address, 
                     is_baptized, is_born_again, cell_id, fellowship_center_id, department_id, foundation_school_status_id,
-                    joined_on, professional_status, occupation, school_name, emergency_contact_name, emergency_contact_relation,
+                    joined_on, professional_status_id, occupation, school_name, emergency_contact_name, emergency_contact_relation,
                     emergency_contact_phone,emergency_contact_whatsapp, profile_photo, created_on, last_updated
                 )
                 values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
