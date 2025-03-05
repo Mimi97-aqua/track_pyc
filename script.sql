@@ -9,7 +9,7 @@ create table if not exists members (
     last_names text not null check(char_length(trim(first_names)) > 0),
     phone_number text unique,
     whatsapp_number text unique,
-    email varchar(100) unique not null,
+    email varchar(100) unique,
     gender varchar(1) not null, --male or female | M/F
     date_of_birth date not null check(date_of_birth <= current_date - interval '13 years'), -- ensures member must be at
     -- least 13 years old
@@ -199,3 +199,71 @@ alter table fellowship_centers
 
 alter table fellowship_centers add constraint fk_fellowship_center_leader foreign key (leader_id) references members(id) on delete set null;
 alter table fellowship_centers add constraint fk_fellowship_center_assistant foreign key (assistant_id) references members(id) on delete set null;
+
+-- modifying colum constraint
+-- modify ot null constraint for email in members table
+alter table members
+alter column email drop not null;
+
+-- create gender table
+create table gender (
+    id serial primary key,
+    type varchar(10) not null unique
+);
+
+insert into gender (type)
+values ('M'), ('F');
+
+alter table members
+drop column gender;
+
+alter table members
+add column gender_id int;
+
+alter table members
+add constraint fk_gender foreign key (gender_id) references gender(id) on delete set null;
+
+-- create foundation_school_status table
+create table foundation_school_status (
+    id serial primary key,
+    status text not null unique
+);
+
+insert into foundation_school_status (status)
+values ('Graduated'), ('Enrolled'), ('Un-enrolled');
+
+alter table members drop column foundation_school_status;
+alter table members add column foundation_school_status_id int;
+
+alter table members
+add constraint fk_foundation_school_status foreign key (foundation_school_status_id) references foundation_school_status(id) on delete set null;
+
+-- create professional_status table
+create table professional_status (
+    id serial primary key,
+    status text not null unique
+);
+
+insert into professional_status (status)
+values ('Employed'), ('Unemployed');
+
+alter table members drop column professional_status;
+alter table members add column professional_status_id int;
+
+alter table members
+add constraint fk_professional_status foreign key (professional_status_id) references professional_status(id) on delete set null;
+
+-- create emergency_contact_relation table
+create table emergency_contact_relation (
+    id serial primary key,
+    relation text not null unique
+);
+
+insert into emergency_contact_relation (relation)
+values ('Brother'), ('Sister'), ('Uncle'), ('Aunt'), ('Mother'), ('Father'), ('Grandmother'), ('Grandfather'), ('Guardian'), ('Friend'), ('Neighbour'), ('Other');
+
+alter table members drop column emergency_contact_relation;
+alter table members add column emergency_contact_relation_id int;
+
+alter table members
+add constraint fk_emergency_contact_relation foreign key (emergency_contact_relation_id) references emergency_contact_relation(id) on delete set null;
