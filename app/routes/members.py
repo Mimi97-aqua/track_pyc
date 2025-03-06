@@ -1,122 +1,99 @@
 from flask import request, jsonify, Blueprint
 from helpers.helper import *
-import datetime
+import datetime as dt
+import uuid
 
 members = Blueprint('members', __name__)
 
-conn = get_db_connection()
-cursor = conn.cursor()
 
-@members.route('/create', methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'TRACE', 'OPTIONS'])
-def create_members():
+@members.route('/create', methods=['POST'])
+def create_member():
     """
-    API endpoint for creating a new member and storing their details in the db.
-
-    Expected form data:
-        - first_names (string): Member's first name(s) - REQUIRED
-        - last_names (string): Member's last name(s) - REQUIRED
-        - phone_number (string): Member's phone number
-        - whatsapp_number (string): Member's whatsapp number
-        - email (string): Member's email
-        - gender (string): Member's gender (either F or M) - REQUIRED
-        - date_of_birth (date): Member's date of birth - REQUIRED
-        - address (string): Member's address - REQUIRED
-        - is_baptized (boolean): Member's is_baptized - REQUIRED
-        - is_born_again (boolean): Member's is_born_again - REQUIRED
-        - cell_id (int): Member's cell (id)
-        - fellowship_center_id (int): Member's fellowship center (id)
-        - department_id (int): Member's department (id)
-        - foundation_school_status (string): Member's foundation school status - REQUIRED
-        - joined_on (date): Date member joined the church - REQUIRED
-        - professional_status (string): Member's professional status (such as employed, unemployed, etc.)
-        - occupation (string): Member's occupation
-        - school_name (string): Member's school name
-        - emergency_contact_name (string): Member's emergency contact name - REQUIRED
-        - emergency_contact_phone (string): Member's emergency contact phone number - REQUIRED
-        - emergency_contact_whatsapp (string): Member's emergency contact email
-        - created_on (timestamptz): The date member created member account - REQUIRED
-        - last_updated (timestamptz): The date member info was last updated in the db - REQUIRED
-        - profile_photo (bytea): Profile photo of member - REQUIRED
-
-    Returns:
-        JSON response with success or error message based on data inputted.
+    API endpoint for creating a new member.
     """
-    if request.method == 'POST':
-        try:
-            first_names = request.form.get('first_names')
-            last_names = request.form.get('last_names')
-            phone_number = request.form.get('phone_number')
-            whatsapp_number = request.form.get('whatsapp_number')
-            email = request.form.get('email')
-            gender_id = request.form.get('gender_id')
-            date_of_birth = request.form.get('date_of_birth')
-            address = request.form.get('address')
-            is_baptized = request.form.get('is_baptized')
-            is_born_again = request.form.get('is_born_again')
-            foundation_school_status_id = request.form.get('foundation_school_status_id')
-            joined_on = request.form.get('joined_on')
-            professional_status_id = request.form.get('professional_status_id')
-            occupation = request.form.get('occupation')
-            school_name = request.form.get('school_name')
-            emergency_contact_name = request.form.get('emergency_contact_name')
-            emergency_contact_relation = request.form.get('emergency_contact_relation')
-            emergency_contact_phone = request.form.get('emergency_contact_phone')
-            emergency_contact_whatsapp = request.form.get('emergency_contact_whatsapp')
-            cell_id = request.form.get('cell_id')
-            department_id = request.form.get('department_id')
-            fellowship_center_id = request.form.get('fellowship_center_id')
-            profile_photo = request.files.get('profile_photo')
+    try:
+        # Get the database connection
+        conn = get_db_connection()
+        cursor = conn.cursor()
 
-            if (not first_names or not last_names or not gender_id or not date_of_birth or not address or not is_baptized
-                    or not is_born_again or not foundation_school_status_id or not joined_on or professional_status_id or not
-                    emergency_contact_phone or not profile_photo):
-                return jsonify({
-                    'status': 'Error',
-                    'message': 'Some required fields are missing'
-                }), 400
+        # Get required form fields
+        required_fields = [
+            "first_names", "last_names", "gender_id", "date_of_birth", "address",
+            "is_baptized", "is_born_again", "foundation_school_status_id", "joined_on",
+            "professional_status_id", "emergency_contact_name", "emergency_contact_phone",
+            "emergency_contact_relation_id"
+        ]
 
-            profile_photo_data = None
-            if profile_photo and profile_photo.filename != '':
-                if not allowed_file(profile_photo.filename):
-                    return jsonify({
-                        'status': 'Error',
-                        'message': 'File not allowed'
-                    }), 400
-                profile_photo_data = profile_photo.read()
+        form_data = {}
+        for field in required_fields:
+            value = request.form.get(field)
+            if value is None or value.strip() == "":
+                return jsonify({"status": "Error", "message": f"Missing required field: {field}"}), 400
+            form_data[field] = value
 
-            created_on = datetime.datetime.now()
-            last_updated = datetime.datetime.now()
+        # Convert necessary fields
+        form_data["gender_id"] = int(form_data["gender_id"])
+        form_data["date_of_birth"] = dt.datetime.strptime(form_data["date_of_birth"], "%Y-%m-%d").date()
+        form_data["joined_on"] = dt.datetime.strptime(form_data["joined_on"], "%Y-%m-%d").date()
+        form_data["foundation_school_status_id"] = int(form_data["foundation_school_status_id"])
+        form_data["professional_status_id"] = int(form_data["professional_status_id"])
+        form_data["emergency_contact_relation_id"] = int(form_data["emergency_contact_relation_id"])
 
-            cursor.execute(
-                """
-                insert into members (
-                    first_names, last_names, phone_number, whatsapp_number, email, gender_id, date_of_birth, address, 
-                    is_baptized, is_born_again, cell_id, fellowship_center_id, department_id, foundation_school_status_id,
-                    joined_on, professional_status_id, occupation, school_name, emergency_contact_name, emergency_contact_relation,
-                    emergency_contact_phone,emergency_contact_whatsapp, profile_photo, created_on, last_updated
-                )
-                values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """,
-                (first_names, last_names, phone_number, whatsapp_number, email, gender_id, date_of_birth, address,
-                    is_baptized, is_born_again, cell_id, fellowship_center_id, department_id, foundation_school_status_id,
-                    joined_on, professional_status_id, occupation, school_name, emergency_contact_name, emergency_contact_relation,
-                    emergency_contact_phone,emergency_contact_whatsapp, profile_photo, created_on, last_updated)
-            )
+        # Get optional fields
+        optional_fields = [
+            "phone_number", "whatsapp_number", "email", "school_name", "occupation",
+            "cell_id", "department_id", "fellowship_center_id", "emergency_contact_whatsapp"
+        ]
+        for field in optional_fields:
+            form_data[field] = request.form.get(field) or None
 
-            close_db_connection()
+        # Convert optional integer fields
+        for int_field in ["cell_id", "department_id", "fellowship_center_id"]:
+            if form_data[int_field]:
+                form_data[int_field] = int(form_data[int_field])
 
-            return jsonify({
-                'status': 'Success',
-                'message': 'Member successfully created'
-            }), 201
-        except Exception as e:
-            return jsonify({
-                'status': 'Error',
-                'message': str(e)
-            }), 500
-    else:
-        return jsonify({
-            'status': 'Error',
-            'message': 'Invalid HTTP method.'
-        }), 405
+        # Handle file upload
+        if 'profile_photo' not in request.files or request.files['profile_photo'].filename == '':
+            return jsonify({"status": "Error", "message": "Missing required field: profile_photo"}), 400
 
+        profile_photo = request.files['profile_photo']
+        if not allowed_file(profile_photo.filename):
+            return jsonify({"status": "Error", "message": "Invalid image type"}), 400
+
+        profile_photo_data = profile_photo.read()
+
+        # Generate timestamps
+        created_on = dt.datetime.now()
+        last_updated = dt.datetime.now()
+
+        # Generate UUID for ID
+        member_id = str(uuid.uuid4())
+
+        # Insert into the database
+        cursor.execute("""
+            INSERT INTO members (
+                id, first_names, last_names, phone_number, whatsapp_number, email, gender_id, 
+                date_of_birth, address, is_baptized, is_born_again, cell_id, fellowship_center_id, 
+                department_id, foundation_school_status_id, joined_on, professional_status_id, 
+                occupation, school_name, emergency_contact_name, emergency_contact_relation_id, 
+                emergency_contact_phone, emergency_contact_whatsapp, profile_photo, created_on, last_updated
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            member_id, form_data["first_names"], form_data["last_names"], form_data["phone_number"],
+            form_data["whatsapp_number"], form_data["email"], form_data["gender_id"],
+            form_data["date_of_birth"], form_data["address"], form_data["is_baptized"],
+            form_data["is_born_again"], form_data["cell_id"], form_data["fellowship_center_id"],
+            form_data["department_id"], form_data["foundation_school_status_id"], form_data["joined_on"],
+            form_data["professional_status_id"], form_data["occupation"], form_data["school_name"],
+            form_data["emergency_contact_name"], form_data["emergency_contact_relation_id"],
+            form_data["emergency_contact_phone"], form_data["emergency_contact_whatsapp"],
+            profile_photo_data, created_on, last_updated
+        ))
+
+        # Commit and close connection
+        close_db_connection()
+
+        return jsonify({"status": "Success", "message": "Member successfully created"}), 201
+
+    except Exception as e:
+        return jsonify({"status": "Error", "message": str(e)}), 500
